@@ -278,6 +278,7 @@ loadjs = function() {
                     case 46:
                         // delete
                         self.clear(row, col);
+                        event.preventDefault();
                         break;
                     default:
                         var keyChar = String.fromCharCode(keyCode);
