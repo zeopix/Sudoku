@@ -1,0 +1,16 @@
+<html>
+<head>
+    <script src="{{ asset('bundles/app/js/lib.js') }}" language="javascript"></script>
+    <script src="{{ asset('bundles/app/js/index.js') }}" language="javascript"></script>
+    <script src="{{ asset('bundles/app/js/maps.js') }}" language="javascript"></script>
+    <link href="{{ asset('bundles/app/js/base.css') }}" rel="stylesheet" type="text/css">
+</head>
+<body onLoad="loadjs();">
+<div id="sudoku-container"></div><br/>
+<center>
+    <!--<button onclick="var solved=Sudoku.core.solve(desk.toArray()); desk.fill(solved);">Solve</button>-->
+    <button onclick="Sudoku.MODE='fill';">FILL</button>
+    <button onclick="Sudoku.MODE='annotate';">ANNOTATE</button>
+</center>
+</body>
+</html>

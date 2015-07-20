@@ -1,0 +1,22 @@
+body {
+    margin: 20px auto;
+    width: 480px;
+}
+
+button {
+    font-size: 20px;
+}
+
+#sudoku-desk td div.fill {
+    position:absolute;
+
+}
+
+#sudoku-desk td div.annotation {
+    position: relative; color: blue;
+
+    padding: 0px;
+    width: 34px;
+    height: 34px;
+
+}
