@@ -1,3 +1,4 @@
+var desk;
 loadjs = function() {
     Sudoku = {
         SIZE: 9,
@@ -130,10 +131,13 @@ loadjs = function() {
         function Desk(id) {
             this.id = id || ID;
             this.map = [];
+            this.solutions = [];
             this.annotations = [];
             for (i=0; i < $.SIZE; ++i) {
+                this.solutions[i] = [];
                 this.annotations[i] = [];
                 for (j=0; j < $.SIZE; ++j) {
+                    this.solutions[i][j] = 0;
                     this.annotations[i][j] = [];
                 }
             }
@@ -169,27 +173,34 @@ loadjs = function() {
             this._getCell(row, col).firstChild.style.backgroundColor = 'white';
         };
 
+        Desk.prototype.save = function() {
+            var gameState = {
+                annotations : this.annotations,
+                solutions : this.solutions,
+                map : this.map
+            }
+            localStorage.setItem('gameState', JSON.stringify(gameState));
+        }
+
+        Desk.prototype.load = function() {
+            var gameState = JSON.parse(localStorage.getItem('gameState'));
+            this.map = gameState.map;
+            this.annotations = gameState.annotations;
+            this.solutions = gameState.solutions;
+            this.redraw();
+        }
+
         Desk.prototype.select = function(row, col) {
             if (this.selected) {
                 this.selected.className = "r";
             }
             this.selected = this._getCell(row, col);
             this.selected.className = "s";
-            this.highlightNum(this.selected.textContent);
+            this.highlightNum(this.selected.firstChild.textContent);
         };
 
-        Desk.prototype._annotateCell = function(row, col, num) {
-            if (((typeof(this.annotations[row][col][num]) == 'undefined') || this.annotations[row][col][num] == false)) {
-                this.annotations[row][col][num] = true;
-            } else {
-                this.annotations[row][col][num] = false;
-            }
-
-            //draw cell
-
-            console.log('Setting '+num+' into row '+row+' col'+col);
-            console.log(this.annotations);
-            this._getCell(row, col).children[1].textContent =  ' ';
+        Desk.prototype._drawAnnotationsCell = function(row, col) {
+            this._getCell(row, col).children[1].textContent =  '';
             for (i=0; i <= $.SIZE; ++i) {
                 if (this.annotations[row][col][i] == true) {
                     var current = this._getCell(row, col).children[1].textContent;
@@ -199,11 +210,23 @@ loadjs = function() {
             }
         }
 
+        Desk.prototype._annotateCell = function(row, col, num) {
+            if ((typeof(this.annotations[row][col][num]) == 'undefined') || this.annotations[row][col][num] == false) {
+                this.annotations[row][col][num] = true;
+            } else {
+                this.annotations[row][col][num] = false;
+            }
+
+            //draw cell
+            this._drawAnnotationsCell(row, col);
+        }
+
         Desk.prototype.set = function(row, col, num, color) {
             if (Sudoku.MODE == 'fill') {
                 cell = this._getCell(row, col).firstChild;
                 cell.style.color = color;
                 cell.textContent = new String(num);
+                this.solutions[row][col] = num;
                 if (typeof(color) != 'undefined') {
                     cell.style.color = color;
                 }
@@ -219,6 +242,20 @@ loadjs = function() {
         Desk.prototype.get = function(row, col) {
             return getNumber(this._getCell(row, col).firstChild.textContent);
         };
+
+        Desk.prototype.redraw = function() {
+            for (var row = 0; row < $.SIZE; ++row) {
+                for (var col = 0; col < $.SIZE; ++col) {
+                    if (this.map[row][col] > 0) {
+                        this.set(row, col, this.map[row][col], 'black');
+                    } else if (parseInt(this.solutions[row][col]) > 0) {
+                        this.set(row, col, this.solutions[row][col], 'red');
+                    } else {
+                        this._drawAnnotationsCell(row, col);
+                    }
+                }
+            }
+        }
 
         Desk.prototype.draw = function(parent) {
             addStyles(this.id);
@@ -322,7 +359,7 @@ loadjs = function() {
         };
     })(Sudoku);
 
-    var desk = new Sudoku.ui.Desk();
+    desk = new Sudoku.ui.Desk();
     desk.draw(document.getElementById("sudoku-container"));
     desk.fill(map1);
 }
